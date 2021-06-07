@@ -1,0 +1,13 @@
+(
+	\name: "SuperCollider Grids",
+	\path: "sc-grids",
+	\summary: "SuperCollider port of Eurorack module Grids by Mutable Instruments",
+	\author: "Emilie Gillet, Dennis Scheiba",
+	\url: "https://github.com/capital-G/sc-grids",
+	\version: 0.1,
+	\isCompatible: {Main.versionAtLeast(3, 9)},
+    \license: "GPL 3",
+    \organization: "Robert Schumann Hochschule Düsseldorf",
+    \country: "Germany",
+    \since, "2021",    
+)
