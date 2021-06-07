@@ -117,8 +117,8 @@ q[\drumMap][\hihat] = #[
 	// get relevant map indices so 0..1 gets mapped to 0..3
 	// b/c drum map is 5x5 and we have a window of 2x2 so
 	// we need to respect the offset
-	i = x.div(0.25);
-	j = y.div(0.25);
+	i = x.div(0.25).clip(0, 3);
+	j = y.div(0.25).clip(0, 3);
 
 	// get values from the 4 (2x2) maps
 	a = q[\drumMap][instrument][i][j][curBeat];
