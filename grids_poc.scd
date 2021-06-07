@@ -172,10 +172,27 @@ q[\pattern] = (
 	sdT: 0.6,
 );
 
-g = EnvirGui(q[\pattern], numItems:  9);
-q[\pattern].keys.do({|key|
-	g.putSpec(key, [0.0, 1.0])
+w = Window("SC grids", Rect(100, 100, 400, 580));
+
+["hh", "sd", "k"].do({|instrument, num|
+	Slider2D(w, Rect(20, 20 + (180*num), 150, 150))
+	.x_(0.5)
+	.y_(0.5)
+	.action_({|sl|
+		q[\pattern]["%X".format(instrument).asSymbol] = sl.x;
+		q[\pattern]["%Y".format(instrument).asSymbol] = sl.y;
+	});
+
+	StaticText(w, Rect(200, 20 + (180*num), 100, 20)).string = instrument;
+
+	a = Slider(w, Rect(200, 95 + (180*num), 150, 20));
+	a.value = 0.5;
+	a.action_({|sl|
+		q[\pattern]["%T".format(instrument).asSymbol] = sl.value;
+	});
 });
+
+w.front;
 )
 
 (
