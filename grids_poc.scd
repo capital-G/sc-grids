@@ -149,6 +149,7 @@ SynthDef(\kick, {|out|
 
 SynthDef(\hh, {|out|
 	var sig = WhiteNoise.ar*EnvGen.kr(Env.perc(releaseTime: \release.kr(0.2)), doneAction: Done.freeSelf)*\amp.kr(0.5);
+	sig = LPF.ar(sig, freq: \ffreq.kr(4000));
 	Out.ar(out, Pan2.ar(sig, \pos.kr(0.0)));
 }).add;
 )
@@ -190,7 +191,8 @@ Tdef(\hh, {
 			(
 				instrument: \hh,
 				amp: level,
-				release: 0.01,
+				release: level.linlin(0, 1.0, 0.0, 0.04),
+				ffreq: 1000 + (exprand(1000, 6000) * level),
 			).play;
 		});
 		(0.125/2).wait;
@@ -227,7 +229,8 @@ Tdef(\snare, {
 			(
 				instrument: \hh,
 				amp: level,
-				release: 0.1,
+				release: level.linlin(0, 1.0, 0.0, 0.2),
+				ffreq: 4000 + (exprand(1000, 4000) * level),
 			).play;
 		});
 		(0.125/2).wait;
