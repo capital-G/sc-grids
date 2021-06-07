@@ -171,8 +171,10 @@ q[\pattern] = (
 	sdT: 0.6,
 );
 
-// does not work?
-//EnvirGui(q[\pattern]);
+g = EnvirGui(q[\pattern], numItems:  9);
+q[\pattern].keys.do({|key|
+	g.addSpec(key, [0.0, 1.0])
+});
 )
 
 (
