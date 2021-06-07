@@ -173,7 +173,7 @@ q[\pattern] = (
 
 g = EnvirGui(q[\pattern], numItems:  9);
 q[\pattern].keys.do({|key|
-	g.addSpec(key, [0.0, 1.0])
+	g.putSpec(key, [0.0, 1.0])
 });
 )
 
