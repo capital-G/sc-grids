@@ -187,3 +187,52 @@ Pgrids : Pattern {
 	}
 
 }
+
+PgridsValue : Pattern {
+	var <>instrument, <>threshold=0.5, <>x=0.0, <>y=0.0, <>length=inf;
+
+	*new {|instrument, threshold=0.5, x=0.0, y=0.0, length=inf|
+		^super.newCopyArgs(instrument, threshold, x, y, length);
+	}
+
+	storeArgs {^[instrument, threshold, x, y, length] }
+
+	embedInStream {|inval|
+		var instrumentStream = instrument.asStream;
+		var xStream = x.asStream;
+		var yStream = y.asStream;
+		var thresholdStream = threshold.asStream;
+
+		var xVal, yVal, instrumentVal, thresholdVal;
+		length.value(inval).do({
+			var outval, b, values, indices, levels;
+
+			xVal = xStream.next(inval);
+			yVal = yStream.next(inval);
+			instrumentVal = instrumentStream.next(inval);
+			thresholdVal = thresholdStream.next(inval);
+
+			if(xVal.notNil and: {yVal.notNil and: {instrumentVal.notNil and: {thresholdVal.notNil}}},
+				{
+					levels = 32.collect({|i|
+						ScGrids.calculateLevel(instrumentVal.asSymbol, curBeat: i, x: xVal, y: yVal);
+					});
+					if(thresholdVal>=1.0, {
+						// yield silence
+						Rest().yield;
+					}, {
+						indices = levels.selectIndices({|level| level>thresholdVal});
+
+						values = indices.collect({|i| levels[i]});
+						b = Pseq(values).asStream;
+						while({outval = b.next; outval.notNil}, {
+							inval = outval.yield;
+						});
+					})
+				}, {
+					inval=nil.yield
+			});
+		});
+		^inval;
+	}
+}
