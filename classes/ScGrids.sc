@@ -175,7 +175,7 @@ Pgrids : Pattern {
 						Rest().yield;
 					}, {
 						indices = levels.selectIndices({|level| level>(1-densityVal)});
-						durations = (indices.shift(-1, 32) - indices)*1/32;
+						durations = (indices.shift(-1, 32) - indices)*1/16;
 						b = Pseq(durations).asStream;
 						while({outval = b.next; outval.notNil}, {
 							inval = outval.yield;
