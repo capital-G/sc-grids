@@ -5,7 +5,7 @@ s.boot;
 SynthDef(\kick, {|out|
 	var sig = SinOsc.ar(XLine.ar(start: 600, end: 50, dur: 0.1));
 	var env = EnvGen.kr(Env.perc(releaseTime: 0.25, curve: 5.0), doneAction: Done.freeSelf);
-	Out.ar(out, Pan2.ar(sig*env));
+	Out.ar(out, Pan2.ar(sig*env*\amp.kr(0.5)));
 }).add;
 
 SynthDef(\hh, {|out|
