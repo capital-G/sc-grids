@@ -140,39 +140,39 @@ ScGrids {
 }
 
 Pgrids : Pattern {
-	var <>instrument, <>threshold=0.5, <>x=0.0, <>y=0.0, <>length=inf;
+	var <>instrument, <>density=0.5, <>x=0.0, <>y=0.0, <>length=inf;
 
-	*new {|instrument, threshold=0.5, x=0.0, y=0.0, length=inf|
-		^super.newCopyArgs(instrument, threshold, x, y, length);
+	*new {|instrument, density=0.5, x=0.0, y=0.0, length=inf|
+		^super.newCopyArgs(instrument, density, x, y, length);
 	}
 
-	storeArgs {^[instrument, threshold, x, y, length] }
+	storeArgs {^[instrument, density, x, y, length] }
 
 	embedInStream {|inval|
 		var instrumentStream = instrument.asStream;
 		var xStream = x.asStream;
 		var yStream = y.asStream;
-		var thresholdStream = threshold.asStream;
+		var densityStream = density.asStream;
 
-		var xVal, yVal, instrumentVal, thresholdVal;
+		var xVal, yVal, instrumentVal, densityVal;
 		length.value(inval).do({
 			var outval, b, durations, indices, levels;
 
 			xVal = xStream.next(inval);
 			yVal = yStream.next(inval);
 			instrumentVal = instrumentStream.next(inval);
-			thresholdVal = thresholdStream.next(inval);
+			densityVal = densityStream.next(inval);
 
-			if(xVal.notNil and: {yVal.notNil and: {instrumentVal.notNil and: {thresholdVal.notNil}}},
+			if(xVal.notNil and: {yVal.notNil and: {instrumentVal.notNil and: {densityVal.notNil}}},
 				{
 					levels = 32.collect({|i|
 						ScGrids.calculateLevel(instrumentVal.asSymbol, curBeat: i, x: xVal, y: yVal);
 					});
-					if(thresholdVal>=1.0, {
+					if(densityVal<=0.0, {
 						// yield silence
 						Rest().yield;
 					}, {
-						indices = levels.selectIndices({|level| level>thresholdVal});
+						indices = levels.selectIndices({|level| level>(1-densityVal)});
 						durations = (indices.shift(-1, 32) - indices)*1/32;
 						b = Pseq(durations).asStream;
 						while({outval = b.next; outval.notNil}, {
@@ -185,43 +185,42 @@ Pgrids : Pattern {
 		});
 		^inval;
 	}
-
 }
 
 PgridsValue : Pattern {
-	var <>instrument, <>threshold=0.5, <>x=0.0, <>y=0.0, <>length=inf;
+	var <>instrument, <>density=0.5, <>x=0.0, <>y=0.0, <>length=inf;
 
-	*new {|instrument, threshold=0.5, x=0.0, y=0.0, length=inf|
-		^super.newCopyArgs(instrument, threshold, x, y, length);
+	*new {|instrument, density=0.5, x=0.0, y=0.0, length=inf|
+		^super.newCopyArgs(instrument, density, x, y, length);
 	}
 
-	storeArgs {^[instrument, threshold, x, y, length] }
+	storeArgs {^[instrument, density, x, y, length] }
 
 	embedInStream {|inval|
 		var instrumentStream = instrument.asStream;
 		var xStream = x.asStream;
 		var yStream = y.asStream;
-		var thresholdStream = threshold.asStream;
+		var densityStream = density.asStream;
 
-		var xVal, yVal, instrumentVal, thresholdVal;
+		var xVal, yVal, instrumentVal, densityVal;
 		length.value(inval).do({
 			var outval, b, values, indices, levels;
 
 			xVal = xStream.next(inval);
 			yVal = yStream.next(inval);
 			instrumentVal = instrumentStream.next(inval);
-			thresholdVal = thresholdStream.next(inval);
+			densityVal = densityStream.next(inval);
 
-			if(xVal.notNil and: {yVal.notNil and: {instrumentVal.notNil and: {thresholdVal.notNil}}},
+			if(xVal.notNil and: {yVal.notNil and: {instrumentVal.notNil and: {densityVal.notNil}}},
 				{
 					levels = 32.collect({|i|
 						ScGrids.calculateLevel(instrumentVal.asSymbol, curBeat: i, x: xVal, y: yVal);
 					});
-					if(thresholdVal>=1.0, {
+					if(densityVal<=0.0, {
 						// yield silence
 						Rest().yield;
 					}, {
-						indices = levels.selectIndices({|level| level>thresholdVal});
+						indices = levels.selectIndices({|level| level>(1-densityVal)});
 
 						values = indices.collect({|i| levels[i]});
 						b = Pseq(values).asStream;
