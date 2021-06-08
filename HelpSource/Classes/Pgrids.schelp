@@ -1,0 +1,148 @@
+TITLE:: Pgrids
+summary:: Topographic drum pattern sequencer
+CATEGORIES:: Collections, Pattern
+RELATED:: Classes/ScGrids, Classes/PgridsValue, Classes/Pbind
+
+DESCRIPTION::
+SuperCollider port of drum sequencer Eurorack module Grids by Mutable Instruments.
+
+Yields the durations between hits.
+If you want to use it in a link::Classes/Tdef:: check out the documentation of link::Classes/ScGrids::.
+
+For more information check the manual of the module https://mutable-instruments.net/modules/grids/manual/
+
+CLASSMETHODS::
+
+METHOD:: new
+
+Calculates the durations between hits according to the parameters of the sequencer.
+If you also need the levels of the sequences see link::Classes/PgridsValue::
+
+ARGUMENT:: instrument
+One of 'kick', 'hihat' or 'snare'.
+
+ARGUMENT:: density
+Density of drum pattern between [0, 1] where 0 is muted and
+1 is the most dense pattern according to the parameters.
+
+ARGUMENT:: x
+x position on the drum map - between [0, 1]
+
+ARGUMENT:: y
+y position on the drum map - between [0, 1]
+
+ARGUMENT:: bias
+adds an offset to the signal and mimics therefore the chaos parameter
+of the original module.
+
+EXAMPLES::
+
+Add some basic drum synths to the server and setup a clock.
+
+code::
+(
+SynthDef(\kick, {|out|
+	var sig = SinOsc.ar(XLine.ar(start: 600, end: 50, dur: 0.1));
+	var env = EnvGen.kr(Env.perc(releaseTime: 0.25, curve: 5.0), doneAction: Done.freeSelf);
+	Out.ar(out, Pan2.ar(sig*env*\amp.kr(0.5)));
+}).add;
+
+SynthDef(\hh, {|out|
+	var sig = WhiteNoise.ar*EnvGen.kr(Env.perc(releaseTime: \release.kr(0.2)), doneAction: Done.freeSelf)*\amp.kr(0.5);
+	sig = LPF.ar(sig, freq: \ffreq.kr(4000));
+	Out.ar(out, Pan2.ar(sig, \pos.kr(0.0)));
+}).add;
+
+// setup a clock
+t = TempoClock.default;
+t.tempo = 130/60.0;
+)
+::
+
+lets play some drums
+
+code::
+(
+Pdef(\kick, Pbind(
+    \instrument, \kick,
+    \dur, Pgrids(\kick, density: 0.3, x: 0.5),
+)).clock_(t).play;
+
+Pdef(\hh, Pbind(
+    \instrument, \hh,
+    \dur, Pgrids(\kick, density: 0.8, y: 0.2),
+)).clock_(t).play;
+)
+::
+
+lets make them more flexible by chaining some patterns inside
+
+code::
+(
+Pdef(\kick, Pbind(
+    \instrument, \kick,
+    \dur, Pgrids(\kick, density: Pseq([0.3, 0.6], inf), x: 0.5)*2,
+)).clock_(t).play;
+
+Pdef(\hh, Pbind(
+    \instrument, \hh,
+    \dur, Pgrids(\kick, density: 0.5, y: Pseq([0.2, 0.5, 0.1], inf), x: Pseq([0.5, 0.1], inf)),
+)).clock_(t).play;
+)
+::
+
+Add some dynamics with PgridsValue which gives us the values of each hit
+we use Pkey so both patterns have always the same values
+because otherwise the values would not match anymore
+
+code::
+(
+Pdef(\kick, Pbind(
+	\instrument, \kick,
+	\density, 0.6,
+	\dur, Pgrids(\kick, Pkey(\density)),
+    // valuesa are in range [0, 1] so we scale them down
+	\amp, PgridsValue(\kick, density: Pkey(\density))*0.5,
+)).clock_(t).play;
+
+Pdef(\hh, Pbind(
+	\instrument, \hh,
+	\density, Pseq([0.3, 0.85, 0.5], inf),
+	\dur, Pgrids(\hihat, Pkey(\density)),
+	\amp, PgridsValue(\hihat, Pkey(\density))*0.5,
+)).clock_(t).play;
+)
+::
+
+Add chaos to the values by introducing the bias parameter
+we need to create the random bias outside of the pattern
+so both patterns Pgrids and PgridsValue work with the
+same randomness
+
+code::
+(
+Pdef(\kick, Pbind(
+	\instrument, \kick,
+	\density, 0.6,
+	\dur, Pgrids(\kick, Pkey(\density), x: 0.1, y: 0.2, bias: Pwhite(-0.0, 0.0)),
+	\amp, PgridsValue(\kick, density: Pkey(\density))*0.5,
+)).clock_(t).play;
+
+Pdef(\hh, Pbind(
+	\instrument, \hh,
+	\density, 0.8,
+	\bias, Pwhite(-0.2, 0.2),
+	\dur, Pgrids(\hihat, Pkey(\density), bias: Pkey(\bias)),
+	\amp, PgridsValue(\hihat, density: Pkey(\density), bias: Pkey(\bias))*0.5,
+)).clock_(t).play;
+)
+::
+
+stop the patterns
+
+code::
+(
+Pdef(\kick).stop;
+Pdef(\hh).stop;
+)
+::

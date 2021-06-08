@@ -1,0 +1,9 @@
+TITLE:: PgridsValue
+summary:: Topographic drum pattern sequencer
+CATEGORIES:: Collections, Pattern
+RELATED:: Classes/ScGrids, Classes/Pgrids, Classes/Pbind
+
+Same as link::Classes/Pgrids:: but instead of durations for
+a pattern it yields the according levels for the pattern.
+
+For more documentation and examples see link::Classes/Pgrids::. 
