@@ -220,18 +220,16 @@ PgridsValue : Pattern {
 					levels = 32.collect({|i|
 						ScGrids.calculateLevel(instrumentVal.asSymbol, curBeat: i, x: xVal, y: yVal, bias: biasVal);
 					});
-					if(densityVal<=0.0, {
-						// yield silence
+					indices = levels.selectIndices({|level| level>(1-densityVal)});
+					if(indices.isEmpty, {
 						Rest().yield;
 					}, {
-						indices = levels.selectIndices({|level| level>(1-densityVal)});
-
 						values = indices.collect({|i| levels[i]});
 						b = Pseq(values).asStream;
 						while({outval = b.next; outval.notNil}, {
 							inval = outval.yield;
 						});
-					})
+					});
 				}, {
 					inval=nil.yield
 			});
