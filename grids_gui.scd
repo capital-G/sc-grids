@@ -26,10 +26,10 @@ Tdef(\hh, {|env|
 		var level = ScGrids.calculateLevel(
 			instrument: \hihat,
 			curBeat: i,
-			x: env.x?0.5,
-			y: env.y?0.5,
+			x: env.x,
+			y: env.y,
 		);
-		if(level>=(1-(env.density?0.5)), {
+		if(level>=(1-(env.density)), {
 			(
 				instrument: \hh,
 				amp: level,
@@ -46,10 +46,10 @@ Tdef(\k, {|env|
 		var level = ScGrids.calculateLevel(
 			instrument: \kick,
 			curBeat: i,
-			x: env.x?0.5,
-			y: env.y?0.5,
+			x: env.x,
+			y: env.y,
 		);
-		if(level>=(1-(env.density?0.5)), {
+		if(level>=(1-(env.density)), {
 			(
 				instrument: \kick,
 				amp: level,
@@ -64,10 +64,10 @@ Tdef(\sd, {|env|
 		var level = ScGrids.calculateLevel(
 			instrument: \snare,
 			curBeat: i,
-			x: env.x?0.5,
-			y: env.y?0.5,
+			x: env.x,
+			y: env.y,
 		);
-		if(level>=(1-(env.density?0.5)), {
+		if(level>=(1-(env.density)), {
 			(
 				instrument: \hh,
 				amp: level,
@@ -78,6 +78,13 @@ Tdef(\sd, {|env|
 		(0.125).wait;
 	});
 }).clock_(t);
+
+// set default values for tdefs
+[\hh, \k, \sd].do({|instrument|
+	[\density, \x, \y].do({|val|
+		Tdef(instrument).set(val, 0.5)
+	});
+});
 
 // GUI for tdefs
 w = Window("SC grids", Rect(100, 100, 400, 580));
@@ -94,13 +101,13 @@ w = Window("SC grids", Rect(100, 100, 400, 580));
 	StaticText(w, Rect(200, 20 + (180*num), 100, 20)).string = instrument;
 	StaticText(w, Rect(200, 60 + (180*num), 150, 20)).string = "density";
 	
-	a = Slider(w, Rect(200, 95 + (180*num), 150, 20));
-	a.value = 0.5;
-	a.action_({|sl|
+	Slider(w, Rect(200, 95 + (180*num), 150, 20))
+	.value_(0.5)
+	.action_({|sl|
 		Tdef(instrument).set(\density, sl.value);
 	});
 	
-	b = Button(w, Rect(200, 120 + (180*num), 100, 40))
+	Button(w, Rect(200, 120 + (180*num), 100, 40))
 	.states_([
 		["play", Color.black, Color.green],
 		["stop", Color.black, Color.red],
