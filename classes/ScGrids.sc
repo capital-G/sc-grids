@@ -173,7 +173,7 @@ Pgrids : Pattern {
 					indices = levels.selectIndices({|level| level>(1-densityVal)});
 					if(indices.isEmpty, {
 						// yield silence
-						Rest().yield;
+						inval = Rest().yield;
 					}, {
 						durations = (indices.shift(-1, 32) - indices)*1/16;
 						b = Pseq(durations).asStream;
@@ -222,7 +222,7 @@ PgridsValue : Pattern {
 					});
 					indices = levels.selectIndices({|level| level>(1-densityVal)});
 					if(indices.isEmpty, {
-						Rest().yield;
+						inval = Rest().yield;
 					}, {
 						values = indices.collect({|i| levels[i]});
 						b = Pseq(values).asStream;
