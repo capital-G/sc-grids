@@ -237,3 +237,49 @@ PgridsValue : Pattern {
 		^inval;
 	}
 }
+
+PgridsValue2 : Pattern {
+	var <>instrument, <>density=0.5, <>x=0.0, <>y=0.0, <>bias=0.0, <>length=inf;
+
+	*new {|instrument, density=0.5, x=0.0, y=0.0, bias=0.0, length=inf|
+		^super.newCopyArgs(instrument, density, x, y, bias, length);
+	}
+
+	storeArgs {^[instrument, density, x, y, bias, length] }
+
+	embedInStream {|inval|
+		var instrumentStream = instrument.asStream;
+		var xStream = x.asStream;
+		var yStream = y.asStream;
+		var densityStream = density.asStream;
+		var biasStream = bias.asStream;
+
+		var xVal, yVal, instrumentVal, densityVal, biasVal;
+		length.value(inval).do({
+			var outval, b, values, indices, levels;
+
+			xVal = xStream.next(inval);
+			yVal = yStream.next(inval);
+			instrumentVal = instrumentStream.next(inval);
+			densityVal = densityStream.next(inval);
+			biasVal = biasStream.next(inval);
+
+			if(xVal.notNil and: {yVal.notNil and: {instrumentVal.notNil and: {densityVal.notNil and: {biasVal.notNil}}}},
+				{
+					levels = 32.collect({|i|
+						ScGrids.calculateLevel(instrumentVal.asSymbol, curBeat: i, x: xVal, y: yVal, bias: biasVal);
+					});
+					values = levels.collect({|lev|
+						if ((lev > (1-densityVal)), { lev }, { 0 });
+					});
+					b = Pseq(values).asStream;
+					while({outval = b.next; outval.notNil}, {
+						inval = outval.yield;
+					});
+				}, {
+					inval=nil.yield
+			});
+		});
+		^inval;
+	}
+}
